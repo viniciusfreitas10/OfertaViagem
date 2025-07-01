@@ -1,6 +1,7 @@
 using JornadaMilhas.Constants;
 using JornadaMilhasV1.Modelos;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace JornadaMilhasTest.Modelos
@@ -80,6 +81,41 @@ namespace JornadaMilhasTest.Modelos
 
             //assert
             Assert.Contains(Constants.MensagemErroValorNegativo, ofertaViagem.Erros.Sumario);
+        }
+
+        [Theory]
+        [InlineData("Alagoinhas", "Salvador", "2024-03-22", "2024-03-25", 0)]
+        [InlineData("Alagoinhas", "Salvador", "2024-03-22", "2024-03-25", -50)]
+        public void RetornaMensagemErroQuandoPrecoIgualOuMenorQueZero1(string origem, string destino, string dataIda, string dataVolta,
+                                                            double preco)
+        {
+            //arrange
+            Rota rota = new(origem, destino);
+            Periodo periodo = new(DateTime.Parse(dataIda), DateTime.Parse(dataVolta));
+
+            //act
+            OfertaViagem ofertaViagem = new(rota, periodo, preco);
+
+            //assert
+            Assert.Contains(Constants.MensagemErroValorNegativo, ofertaViagem.Erros.Sumario);
+        }
+
+        [Theory]
+        [InlineData("Alagoinhas", "Salvador", "2024-03-22", "2024-03-25", -10)]
+        [InlineData("Alagoinhas", "Salvador", "2024-03-22", "2024-03-25", -50)]
+        public void RetornaTresErrosDeValidacaoQuandoRotaPeriodoEPrecoInvalidos(string origem, string destino, string dataIda, string dataVolta,
+                                                            double preco)
+        {
+            //arrange
+            int quantidadeEsperada = 3;
+            Rota rota = null;
+            Periodo periodo = new(DateTime.Parse(dataIda), DateTime.Parse(dataVolta));
+
+            //act
+            OfertaViagem ofertaViagem = new(rota, periodo, preco);
+
+            //assert
+            Assert.Equal(quantidadeEsperada, ofertaViagem.Erros.Count());
         }
     }
 }

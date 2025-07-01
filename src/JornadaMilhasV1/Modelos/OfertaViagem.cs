@@ -11,11 +11,22 @@ namespace JornadaMilhasV1.Modelos
 {
     public class OfertaViagem : Valida
     {
+        private double desconto;
+        public const double DESCONTO_MAXIMO = 0.7;
         public int Id { get; set; }
         public Rota Rota { get; set; }
+        public bool Ativa { get; set; } = true;
         public Periodo Periodo { get; set; }
         public double Preco { get; set; }
-
+        public double Desconto
+        {
+            get => desconto;
+            set
+            {
+                desconto = value;
+                ValidaDesconto();
+            }
+        }
 
         public OfertaViagem(Rota rota, Periodo periodo, double preco)
         {
@@ -36,17 +47,29 @@ namespace JornadaMilhasV1.Modelos
             {
                 Erros.RegistrarErro(Periodo.Erros.Sumario);
             }
-            else if (Rota == null || Periodo == null)
+            
+            if (Rota == null || Periodo == null)
             {
                 Erros.RegistrarErro("A oferta de viagem não possui rota ou período válidos.");
             }
-            else if (Preco <= 0)
+
+            if (Preco <= 0)
             {
                 Erros.RegistrarErro(Constants.MensagemErroValorNegativo);
-            }else if(string.IsNullOrEmpty(Rota.Destino) || string.IsNullOrEmpty(Rota.Origem))
+            }
+
+            if(string.IsNullOrEmpty(Rota?.Destino) || string.IsNullOrEmpty(Rota?.Origem))
             {
                 Erros.RegistrarErro("O Destino ou Origem não podem ser vazios");
             }
+        }
+
+        private void ValidaDesconto()
+        {
+            if (desconto >= Preco)
+                Preco *= (1 - DESCONTO_MAXIMO);
+            else if (desconto > 0)
+                Preco -= desconto;
         }
     }
 }
